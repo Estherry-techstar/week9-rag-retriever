@@ -1,0 +1,7 @@
+﻿[
+  {"q": "When should I use agentic retrieval?", "relevant_pages": [7, 5, 2]},
+  {"q": "How does agentic retrieval handle parallel subqueries?", "relevant_pages": [4]},
+  {"q": "What is the difference between agentic retrieval and classic RAG?", "relevant_pages": [5, 2]},
+  {"q": "What multi-source capabilities does Azure AI Search provide?", "relevant_pages": [5]},
+  {"q": "How does chunking help with large documents?", "relevant_pages": [6]}
+]

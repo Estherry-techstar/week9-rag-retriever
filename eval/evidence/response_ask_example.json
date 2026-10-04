@@ -1,0 +1,48 @@
+{
+  "question": "when should I use agentic retrieval instead of classic RAG",
+  "answer": "Based on the provided sources, here are the key guidelines for choosing between agentic retrieval and classic RAG:\n\n**Use agentic retrieval when:**\n- Your client is an agent or chatbot requiring high relevance and accuracy [1]\n- You have complex or conversational queries [1]\n- You need structured responses with citations and query details [1]\n- You are building new RAG implementations [1]\n- You require context-aware query planning, parallel execution of multiple focused subqueries, and structured responses with grounding data [2][3]\n\n**Use classic RAG when:**\n- You only need generally available (GA) features [1]\n- Simplicity and speed are priorities over advanced relevance [1]\n- You have existing orchestration code you want to preserve [1]\n- You need fine-grained control over the query pipeline [1]\n- You prefer millisecond query response times and single-shot queries [4]\n\n**Key differences:**\n- Agentic retrieval provides multi-source access, parallel subquery execution, and built-in semantic ranking for optimal relevance [2][3]\n- Classic RAG uses hybrid search and semantic ranking, is simpler with fewer components, and is faster due to lack of LLM involvement in query planning [2][4]\n- For new RAG implementations, agentic retrieval is recommended; for existing solutions, migration may improve accuracy and context understanding [2]\n\nIn summary, choose agentic retrieval for complex, conversational queries, new implementations, and when you need structured outputs with citations and advanced query planning capabilities [1][2][3]. Choose classic RAG when simplicity, speed, and GA features are sufficient, or when you have existing orchestration code to preserve [1][4].",
+  "sources": [
+    {
+      "id": 1,
+      "citation": "MS Learn RAG, p.7",
+      "source": "MS Learn RAG",
+      "page": 7,
+      "rerank_score": 7.9014,
+      "excerpt": "Use agentic retrieval when:\nYour client is an agent or chatbot.\nYou need the highest possible relevance and accuracy.\nYour queries are complex or conversational.\nYou want structured responses with cit"
+    },
+    {
+      "id": 2,
+      "citation": "MS Learn RAG, p.5",
+      "source": "MS Learn RAG",
+      "page": 5,
+      "rerank_score": 4.096,
+      "excerpt": "Azure AI Search is a proven solution for RAG workloads . It now provides agentic retrieval, a\nspecialized pipeline designed specifically for RAG patterns. This approach uses LLMs to\nintelligently brea"
+    },
+    {
+      "id": 3,
+      "citation": "MS Learn RAG, p.2",
+      "source": "MS Learn RAG",
+      "page": 2,
+      "rerank_score": 3.9544,
+      "excerpt": "Azure AI Search provides two approaches designed specifically for these RAG challenges:\nAgentic retrieval: A complete RAG pipeline with LLM-based query planning (preview), multi-\nsource access, and st"
+    },
+    {
+      "id": 4,
+      "citation": "MS Learn RAG, p.4",
+      "source": "MS Learn RAG",
+      "page": 4,
+      "rerank_score": 3.9311,
+      "excerpt": "The problem: Users expect answers in 3-5 seconds, but you're querying multiple sources with\ncomplex processing.\nAgentic retrieval solution:\nParallel subquery execution (not sequential)\nAdjustable reas"
+    },
+    {
+      "id": 5,
+      "citation": "MS Learn RAG, p.6",
+      "source": "MS Learn RAG",
+      "page": 6,
+      "rerank_score": 2.2935,
+      "excerpt": "Content challenge How Azure AI Search helps\nLarge documents Automatic chunking (built-in or via skills)\nMultiple languages More than 50 language analyzers for text, multilingual vectors\nImages and PDF"
+    }
+  ],
+  "refused": false,
+  "model": "openrouter/free"
+}
