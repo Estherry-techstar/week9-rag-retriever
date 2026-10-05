@@ -1,0 +1,115 @@
+{
+  "k": 5,
+  "n_questions": 5,
+  "mean_precision@5": 0.32,
+  "per_question": [
+    {
+      "q": "When should I use agentic retrieval?",
+      "relevant_pages": [
+        7,
+        5,
+        2
+      ],
+      "retrieved_pages": [
+        7,
+        4,
+        5,
+        2,
+        6
+      ],
+      "retrieved_citations": [
+        "MS Learn RAG, p.7",
+        "MS Learn RAG, p.4",
+        "MS Learn RAG, p.5",
+        "MS Learn RAG, p.2",
+        "MS Learn RAG, p.6"
+      ],
+      "precision@5": 0.6
+    },
+    {
+      "q": "How does agentic retrieval handle parallel subqueries?",
+      "relevant_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        5,
+        2,
+        6,
+        7
+      ],
+      "retrieved_citations": [
+        "MS Learn RAG, p.4",
+        "MS Learn RAG, p.5",
+        "MS Learn RAG, p.2",
+        "MS Learn RAG, p.6",
+        "MS Learn RAG, p.7"
+      ],
+      "precision@5": 0.2
+    },
+    {
+      "q": "What is the difference between agentic retrieval and classic RAG?",
+      "relevant_pages": [
+        5,
+        2
+      ],
+      "retrieved_pages": [
+        7,
+        4,
+        2,
+        5,
+        3
+      ],
+      "retrieved_citations": [
+        "MS Learn RAG, p.7",
+        "MS Learn RAG, p.4",
+        "MS Learn RAG, p.2",
+        "MS Learn RAG, p.5",
+        "MS Learn RAG, p.3"
+      ],
+      "precision@5": 0.4
+    },
+    {
+      "q": "What multi-source capabilities does Azure AI Search provide?",
+      "relevant_pages": [
+        5
+      ],
+      "retrieved_pages": [
+        2,
+        5,
+        6,
+        1,
+        7
+      ],
+      "retrieved_citations": [
+        "MS Learn RAG, p.2",
+        "MS Learn RAG, p.5",
+        "MS Learn RAG, p.6",
+        "MS Learn RAG, p.1",
+        "MS Learn RAG, p.7"
+      ],
+      "precision@5": 0.2
+    },
+    {
+      "q": "How does chunking help with large documents?",
+      "relevant_pages": [
+        6
+      ],
+      "retrieved_pages": [
+        6,
+        3,
+        1,
+        4,
+        5
+      ],
+      "retrieved_citations": [
+        "MS Learn RAG, p.6",
+        "MS Learn RAG, p.3",
+        "MS Learn RAG, p.1",
+        "MS Learn RAG, p.4",
+        "MS Learn RAG, p.5"
+      ],
+      "precision@5": 0.2
+    }
+  ]
+}

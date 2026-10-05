@@ -59,38 +59,50 @@ The response shape:
   "refused": false,
   "model": "openrouter/free"
 }
-Verified example
-Query: when should I use agentic retrieval instead of classic RAG
+```
 
-Result: a multi-paragraph answer with citations [1]–[4] grounded entirely in the
-indexed MS Learn RAG PDF. Top rerank scores: 7.90, 4.10, 3.95, 3.93, 2.29 — a clean
+### Verified example
+
+Query: `when should I use agentic retrieval instead of classic RAG`
+
+Result: a multi-paragraph answer with citations `[1]`–`[4]` grounded entirely in the
+indexed MS Learn RAG PDF. Top rerank scores: **7.90, 4.10, 3.95, 3.93, 2.29** — a clean
 relevance decay curve confirming the cross-encoder is discriminating correctly.
-refused: false. Full response saved at eval/evidence/response_ask_example.json.
+`refused: false`. Full response saved at `eval/evidence/response_ask_example.json`.
 
-Failure modes handled
-Failure mode	Where handled
-Empty retrieval	answer.py returns refused: true, reason: "no_results" before spending tokens
-Low-relevance retrieval	min_rerank_score gate; returns refused: true, reason: "low_relevance"
-Conflicting sources	System prompt rule 3 — model must name the conflict and cite both
-Prompt injection in documents	System prompt rule 4 + <source> tag wrapping; document text is data, not instructions
-Model routing to non-chat model	Observed with openrouter/free; documented below
-Known issue: openrouter/free model routing
-openrouter/free selects an available free model at random per request. During testing it
-occasionally routed to a content-safety classifier instead of a chat model, producing
-"User Safety: safe" in the answer field despite correct retrieval. Worked around by
+### Failure modes handled
+
+| Failure mode | Where handled |
+|---|---|
+| Empty retrieval | `answer.py` returns `refused: true, reason: "no_results"` before spending tokens |
+| Low-relevance retrieval | `min_rerank_score` gate; returns `refused: true, reason: "low_relevance"` |
+| Conflicting sources | System prompt rule 3 — model must name the conflict and cite both |
+| Prompt injection in documents | System prompt rule 4 + `<source>` tag wrapping; document text is data, not instructions |
+| Model routing to non-chat model | Observed with `openrouter/free`; documented below |
+
+---
+
+## Known issue: `openrouter/free` model routing
+
+`openrouter/free` selects an available free model at random per request. During testing it
+occasionally routed to a **content-safety classifier** instead of a chat model, producing
+`"User Safety: safe"` in the answer field despite correct retrieval. Worked around by
 retrying, and documented here as a real-world model-routing failure mode. For a stable
-graded demo, pin a specific free chat model (e.g. openai/gpt-oss-120b:free) instead of
+graded demo, pin a specific free chat model (e.g. `openai/gpt-oss-120b:free`) instead of
 the router.
 
-Retrieval evaluation (precision@k)
-Status: labelled set defined, runner planned. Documented here so the method is
-explicit and reviewable.
+---
 
-Labelled set — eval/labelled.json
+## Retrieval evaluation (precision@k)
+
+**Status:** implemented. `eval/run_eval.py` runs `hybrid_search` on each labelled question, computes precision@5 with denominator fixed at k=5, and writes measured results to `eval/results.json`. First run: **mean precision@5 = 0.32**.
+
+### Labelled set — `eval/labelled.json`
+
 Five questions drawn from the indexed MS Learn RAG PDF, each with the page(s) that
 contain the correct answer:
 
-json
+```json
 [
   {"q": "When should I use agentic retrieval?",
    "relevant_pages": [7, 5, 2]},
@@ -103,50 +115,75 @@ json
   {"q": "How does chunking help with large documents?",
    "relevant_pages": [6]}
 ]
-Method
+```
+
+### Method
+
 For each labelled question:
 
-Call hybrid_search(q, n_results=k) with k = 5.
+1. Call `hybrid_search(q, n_results=k)` with **k = 5**.
+2. Treat a retrieved chunk as **relevant** if its `page` appears in `relevant_pages`.
+3. Compute `precision@k = (# relevant in top-k) / k`.
+4. Report the mean precision@5 across the labelled set.
 
-Treat a retrieved chunk as relevant if its page appears in relevant_pages.
+### Interpretation
 
-Compute precision@k = (# relevant in top-k) / k.
+- **precision@5 = 1.0** → every retrieved chunk is on a page that contains the answer.
+- **precision@5 = 0.6** → 3 of 5 retrieved chunks are relevant.
+- Low precision with high recall suggests the retriever is over-fetching and the reranker
+  needs a stricter cutoff (raise `min_rerank_score`).
 
-Report the mean precision@5 across the labelled set.
+### Runner — `eval/run_eval.py`
 
-Interpretation
-precision@5 = 1.0 → every retrieved chunk is on a page that contains the answer.
+```bash
+python -m eval.run_eval
+```
 
-precision@5 = 0.6 → 3 of 5 retrieved chunks are relevant.
+Loads `eval/labelled.json`, calls `hybrid_search(q, n_results=5)` per question,
+computes precision@5 with denominator fixed at 5 (consistent with the method
+above), and writes measured output to `eval/results.json`.
 
-Low precision with high recall suggests the retriever is over-fetching and the reranker
-needs a stricter cutoff (raise min_rerank_score).
+### Results — first run
 
-Planned runner — eval/run_eval.py
-python
-# Sketch — to be completed as a follow-up commit.
-# 1. Load eval/labelled.json
-# 2. For each q: hits = hybrid_search(q, n_results=5)
-# 3. relevant = sum(1 for h in hits if h["page"] in item["relevant_pages"])
-# 4. precision = relevant / len(hits)
-# 5. Mean across items; write eval/results.json
-# NOTE: free-tier rate limit is 20 req/min, 50 req/day —
-#       add time.sleep(2) between queries when running against /ask.
+| Question | relevant_pages | retrieved_pages | precision@5 |
+|---|---|---|---|
+| When should I use agentic retrieval? | 7, 5, 2 | 7, 4, 5, 2, 6 | 0.60 |
+| How does agentic retrieval handle parallel subqueries? | 4 | 4, 5, 2, 6, 7 | 0.20 |
+| Difference between agentic retrieval and classic RAG? | 5, 2 | 7, 4, 2, 5, 3 | 0.40 |
+| Multi-source capabilities of Azure AI Search? | 5 | 2, 5, 6, 1, 7 | 0.20 |
+| How does chunking help with large documents? | 6 | 6, 3, 1, 4, 5 | 0.20 |
+| **Mean** | | | **0.32** |
 
+**Interpretation.** Every question returned at least one ground-truth page in
+the top 5, confirming the retriever surfaces relevant content. Precision is
+capped by page-level granularity — multiple chunks from the same page share
+a single label, so a correct retrieval of three pages can still only score
+3/5 if the other two hits land on unlabelled pages. This is the limitation
+noted in "Known limitations (Week 9)". A chunk-level ground-truth set would
+produce a more discriminating score.
 
-Week 9 summary
-Objective	Status
-Vector + hybrid (keyword) search with reranking	✅ Implemented
-Grounded answers with source citations	✅ Verified (response_ask_example.json)
-Refusal on unsupported claims / hallucination guard	✅ Implemented (no_results, low_relevance)
-Retrieval evaluation (precision@k)	⚠️ Labelled set + method defined; runner planned
-Known limitations (Week 9)
-openrouter/free is non-deterministic; a pinned :free model is recommended for
-reproducible evaluation runs.
+---
 
-Free-tier rate limits (20 req/min, 50 req/day) cap how quickly the precision@k runner
-can execute; batching with delays is required.
+## Week 9 summary
 
-Precision@k is computed against page numbers, which is coarser than chunk-level
-ground truth. It is sufficient for a small labelled set but would be replaced by
-chunk-level labels in a larger evaluation.
+| Objective | Status |
+|---|---|
+| Vector + hybrid (keyword) search with reranking | ✅ Implemented |
+| Grounded answers with source citations | ✅ Verified (`response_ask_example.json`) |
+| Refusal on unsupported claims / hallucination guard | ✅ Implemented (`no_results`, `low_relevance`) |
+| Retrieval evaluation (precision@k) | ✅ Implemented — mean precision@5 = 0.32, see `eval/results.json` |
+
+---
+
+## Known limitations (Week 9)
+
+- `openrouter/free` is non-deterministic; a pinned `:free` model is recommended for
+  reproducible evaluation runs.
+- Free-tier rate limits (20 req/min, 50 req/day) cap how quickly the precision@k runner
+  can execute; batching with delays is required.
+- Precision@k is computed against page numbers, which is coarser than chunk-level
+  ground truth. It is sufficient for a small labelled set but would be replaced by
+  chunk-level labels in a larger evaluation.
+- First precision@5 run scored 0.32 on 5 labelled questions. Every question retrieved at
+  least one ground-truth page in the top 5, but page-level labels cap achievable
+  precision. Chunk-level labels would be the next refinement.
